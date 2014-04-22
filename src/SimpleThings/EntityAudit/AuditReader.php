@@ -65,11 +65,12 @@ class AuditReader
      */
     public function find($className, $id, $revision)
     {
+        $class = $this->em->getClassMetadata($className);
+        $className = $class->name;
         if (!$this->metadataFactory->isAudited($className)) {
             throw AuditException::notAudited($className);
         }
 
-        $class = $this->em->getClassMetadata($className);
         $tableName = $this->config->getTablePrefix() . $class->table['name'] . $this->config->getTableSuffix();
 
         if (!is_array($id)) {
@@ -311,11 +312,12 @@ class AuditReader
      */
     public function findRevisions($className, $id)
     {
+        $class = $this->em->getClassMetadata($className);
+        $className = $class->name;
         if (!$this->metadataFactory->isAudited($className)) {
             throw AuditException::notAudited($className);
         }
 
-        $class = $this->em->getClassMetadata($className);
         $tableName = $this->config->getTablePrefix() . $class->table['name'] . $this->config->getTableSuffix();
 
         if (!is_array($id)) {
@@ -363,11 +365,12 @@ class AuditReader
      */
     public function getCurrentRevision($className, $id)
     {
+        $class = $this->em->getClassMetadata($className);
+        $className = $class->name;
         if (!$this->metadataFactory->isAudited($className)) {
             throw AuditException::notAudited($className);
         }
 
-        $class = $this->em->getClassMetadata($className);
         $tableName = $this->config->getTablePrefix() . $class->table['name'] . $this->config->getTableSuffix();
 
         if (!is_array($id)) {
@@ -385,7 +388,11 @@ class AuditReader
                 if ($whereSQL) {
                     $whereSQL .= " AND ";
                 }
-                $whereSQL .= "e." . $class->associationMappings[$idField]['joinColumns'][0] . " = ?";
+                if (is_array($class->associationMappings[$idField]['joinColumns'][0]) && isset($class->associationMappings[$idField]['joinColumns'][0]['name'])) {
+                    $whereSQL .= "e." . $class->associationMappings[$idField]['joinColumns'][0]['name'] . " = ?";
+                } else {
+                    $whereSQL .= "e." . $class->associationMappings[$idField]['joinColumns'][0] . " = ?";
+                }
             }
         }
 
@@ -446,11 +453,12 @@ class AuditReader
 
     public function getEntityHistory($className, $id)
     {
+        $class = $this->em->getClassMetadata($className);
+        $className = $class->name;
         if (!$this->metadataFactory->isAudited($className)) {
             throw AuditException::notAudited($className);
         }
 
-        $class = $this->em->getClassMetadata($className);
         $tableName = $this->config->getTablePrefix() . $class->table['name'] . $this->config->getTableSuffix();
 
         if (!is_array($id)) {
